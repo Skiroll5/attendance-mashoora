@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import { Link } from '@/i18n/routing';
 import { QrCode, PlusCircle, Calendar, Users, Shield, GraduationCap, CheckCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SessionCard from '@/components/admin/SessionCard';
 
 export default async function AdminDashboardPage() {
   const t = await getTranslations('Admin');
@@ -84,29 +85,8 @@ export default async function AdminDashboardPage() {
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {sessions.map((session) => (
-                  <Card key={session.id} className="hover:border-primary/50 transition-colors shadow-sm">
-                    <CardHeader className="pb-3 bg-secondary/5 rounded-t-lg">
-                      <CardTitle className="text-lg line-clamp-1">{session.className}</CardTitle>
-                      <CardDescription className="flex items-center gap-1 text-primary/70">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(session.sessionDate).toLocaleDateString()}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-4 flex gap-2">
-                      <Button asChild className="w-full" variant="outline">
-                        <Link href={`/admin/session/${session.id}`}>
-                          <Users className="mr-2 h-4 w-4" />
-                          Details
-                        </Link>
-                      </Button>
-                      <Button asChild className="w-full">
-                        <Link href={`/admin/session/${session.id}/scan`}>
-                          <QrCode className="mr-2 h-4 w-4" />
-                          {t('scan')}
-                        </Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  // @ts-ignore
+                  <SessionCard key={session.id} session={session} tScan={t('scan')} />
                 ))}
               </div>
             )}

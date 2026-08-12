@@ -119,3 +119,41 @@ export async function getSessionAttendees(sessionId: string) {
   
   return data;
 }
+
+export async function deleteSession(sessionId: string) {
+  const session = await auth();
+  // @ts-ignore
+  if (!session?.user?.isAdmin) return { error: 'Unauthorized' };
+  
+  await db.delete(classSessions).where(eq(classSessions.id, sessionId));
+  return { success: true };
+}
+
+export async function updateSession(sessionId: string, className: string, sessionDateStr: string) {
+  const session = await auth();
+  // @ts-ignore
+  if (!session?.user?.isAdmin) return { error: 'Unauthorized' };
+  
+  try {
+    const dateParts = sessionDateStr.split('-');
+    const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+    
+    await db.update(classSessions).set({
+      className,
+      sessionDate: date,
+    }).where(eq(classSessions.id, sessionId));
+    return { success: true };
+  } catch (error) {
+    return { error: 'Failed to update session.' };
+  }
+}
+
+export async function undoAttendance(sessionId: string, studentId: string) {
+  const session = await auth();
+  // @ts-ignore
+  if (!session?.user?.isAdmin) return { error: 'Unauthorized' };
+  
+  await db.delete(attendance)
+    .where(and(eq(attendance.sessionId, sessionId), eq(attendance.studentId, studentId)));
+  return { success: true };
+}
