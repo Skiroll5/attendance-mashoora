@@ -105,6 +105,7 @@ export async function logAttendance(sessionId: string, studentId: string) {
 
 export async function getSessionAttendees(sessionId: string) {
   const session = await auth();
+  // @ts-ignore
   if (!session?.user?.isAdmin) return [];
 
   const data = await db.select({
