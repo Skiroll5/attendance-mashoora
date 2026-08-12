@@ -1,0 +1,37 @@
+{
+  "Index": {
+    "title": "Sistema di Presenze",
+    "register": "Registra Nuovo Studente",
+    "admin": "Pannello di Amministrazione"
+  },
+  "Register": {
+    "title": "Registrazione Studente",
+    "fullName": "Nome Completo",
+    "email": "Email",
+    "phoneNumber": "Numero di Telefono",
+    "birthday": "Data di Nascita",
+    "graduation": "Anno di Diploma",
+    "submit": "Registrati",
+    "success": "Registrazione completata!",
+    "downloadQR": "Scarica il QR Code",
+    "saveInstructions": "Salva questo codice e usalo per registrare le presenze."
+  },
+  "Admin": {
+    "dashboard": "Pannello di Controllo",
+    "login": "Accedi",
+    "signInWithGoogle": "Accedi con Google",
+    "sessions": "Sessioni",
+    "newSession": "Nuova Sessione",
+    "className": "Nome del Corso",
+    "date": "Data",
+    "create": "Crea",
+    "scan": "Scansiona",
+    "scannerTitle": "Scansiona QR Studente",
+    "scanSuccess": "Presenza registrata con successo",
+    "scanError": "Errore durante la scansione",
+    "duplicateError": "Studente già registrato in questa sessione"
+  },
+  "Language": {
+    "toggle": "Cambia Lingua"
+  }
+}

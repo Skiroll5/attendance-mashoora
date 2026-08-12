@@ -1,0 +1,37 @@
+{
+  "Index": {
+    "title": "نظام الحضور",
+    "register": "تسجيل طالب جديد",
+    "admin": "لوحة الإدارة"
+  },
+  "Register": {
+    "title": "تسجيل الطالب",
+    "fullName": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phoneNumber": "رقم الهاتف",
+    "birthday": "تاريخ الميلاد",
+    "graduation": "سنة التخرج",
+    "submit": "تسجيل",
+    "success": "تم التسجيل بنجاح!",
+    "downloadQR": "تحميل رمز الاستجابة السريعة (QR Code)",
+    "saveInstructions": "يرجى حفظ هذا الرمز واستخدامه لتسجيل الحضور."
+  },
+  "Admin": {
+    "dashboard": "لوحة التحكم",
+    "login": "تسجيل الدخول",
+    "signInWithGoogle": "تسجيل الدخول باستخدام Google",
+    "sessions": "الجلسات",
+    "newSession": "جلسة جديدة",
+    "className": "اسم الفصل",
+    "date": "التاريخ",
+    "create": "إنشاء",
+    "scan": "مسح",
+    "scannerTitle": "مسح رمز الطالب",
+    "scanSuccess": "تم تسجيل الحضور بنجاح",
+    "scanError": "حدث خطأ أثناء المسح",
+    "duplicateError": "الطالب مسجل مسبقاً في هذه الجلسة"
+  },
+  "Language": {
+    "toggle": "تغيير اللغة"
+  }
+}
