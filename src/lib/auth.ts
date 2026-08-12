@@ -18,15 +18,21 @@ export const authConfig = {
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     })
   ],
+  session: { strategy: "jwt" },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isAdminRoute = nextUrl.pathname.includes('/admin');
-      if (isAdminRoute) {
-        if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+    jwt({ token, user }) {
+      if (user) {
+        // @ts-ignore
+        token.isAdmin = user.isAdmin;
       }
-      return true;
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user && token) {
+        // @ts-ignore
+        session.user.isAdmin = token.isAdmin;
+      }
+      return session;
     },
   },
 } satisfies NextAuthConfig
