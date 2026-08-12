@@ -8,44 +8,30 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, RotateCcw } from 'lucide-react';
 
-// Play a short beep using Web Audio API
-const playBeep = () => {
-  try {
-    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); // 800Hz
-    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volume
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    oscillator.start();
-    // Stop after 150ms
-    setTimeout(() => {
-      oscillator.stop();
-      audioCtx.close();
-    }, 150);
-  } catch (e) {
-    console.error("Audio beep failed", e);
-  }
-};
-
 export default function QRCodeScanner({ sessionId }: { sessionId: string }) {
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   
-  // State for success overlay
   const [lastScanned, setLastScanned] = useState<{ studentId: string, name: string } | null>(null);
   const [isUndoing, setIsUndoing] = useState(false);
+  
+  // Track recently scanned to avoid rapid duplicate requests
+  const recentScansRef = useRef<Set<string>>(new Set());
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const t = useTranslations('Admin');
 
+  const playBeep = () => {
+    try {
+      const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+      audio.volume = 0.5;
+      audio.play().catch(e => console.error("Audio beep blocked by browser policy:", e));
+    } catch (e) {
+      console.error("Audio playback failed", e);
+    }
+  };
+
   useEffect(() => {
-    // Only initialize if not already scanning
     if (!isScanning) {
       scannerRef.current = new Html5QrcodeScanner(
         'qr-reader',
@@ -59,47 +45,38 @@ export default function QRCodeScanner({ sessionId }: { sessionId: string }) {
       );
 
       const onScanSuccess = async (decodedText: string) => {
-        // Pause scanning to prevent multiple rapid requests
-        scannerRef.current?.pause(true);
+        if (recentScansRef.current.has(decodedText)) {
+          return; // Ignore duplicate scan within the cooldown window
+        }
+        
+        recentScansRef.current.add(decodedText);
+        // Remove from recent scans after 3 seconds so they can scan again if needed
+        setTimeout(() => {
+          recentScansRef.current.delete(decodedText);
+        }, 3000);
         
         try {
           const res = await logAttendance(sessionId, decodedText);
           if (res.error) {
-            toast.error(t('scanError'), {
-              description: res.error,
-            });
-            // Resume quickly on error
-            setTimeout(() => {
-              scannerRef.current?.resume();
-            }, 1500);
+            toast.error(t('scanError'), { description: res.error });
           } else if (res.success && res.studentName) {
             playBeep();
-            toast.success(t('scanSuccess'), {
-              description: `Student: ${res.studentName}`
-            });
             
-            // Show overlay
+            // Show below scanner
             setLastScanned({ studentId: decodedText, name: res.studentName });
             
-            // Clear any existing timeout
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            
-            // Resume scanning and hide overlay after 4 seconds
             timeoutRef.current = setTimeout(() => {
               setLastScanned(null);
-              scannerRef.current?.resume();
-            }, 4000);
+            }, 5000); // keep it visible for 5 seconds
           }
         } catch (err) {
           console.error(err);
-          setTimeout(() => {
-            scannerRef.current?.resume();
-          }, 1500);
         }
       };
 
       const onScanFailure = (error: any) => {
-        // ignore scan failure, it happens every frame no QR is found
+        // ignore scan failure
       };
 
       scannerRef.current.render(onScanSuccess, onScanFailure);
@@ -119,7 +96,6 @@ export default function QRCodeScanner({ sessionId }: { sessionId: string }) {
     if (!lastScanned) return;
     
     setIsUndoing(true);
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     
     try {
       const res = await undoAttendance(sessionId, lastScanned.studentId);
@@ -127,6 +103,7 @@ export default function QRCodeScanner({ sessionId }: { sessionId: string }) {
         toast.info("Attendance undone.", {
           description: `Removed ${lastScanned.name} from this session.`
         });
+        setLastScanned(null);
       } else {
         toast.error("Failed to undo", { description: res.error });
       }
@@ -134,36 +111,35 @@ export default function QRCodeScanner({ sessionId }: { sessionId: string }) {
       toast.error("Error undoing attendance");
     } finally {
       setIsUndoing(false);
-      setLastScanned(null);
-      scannerRef.current?.resume();
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto rounded-xl overflow-hidden shadow-lg border border-primary/20 bg-card relative">
+    <div className="w-full max-w-md mx-auto space-y-6">
+      <div className="rounded-xl overflow-hidden shadow-lg border border-primary/20 bg-card">
+        <div id="qr-reader" className="w-full" />
+      </div>
+
       {lastScanned && (
-        <div className="absolute inset-0 z-50 bg-primary/95 flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-300">
-          <CheckCircle2 className="w-16 h-16 text-primary-foreground mb-4" />
-          <h3 className="text-xl text-primary-foreground/80 font-medium">Recorded successfully</h3>
-          <h2 className="text-4xl font-bold text-primary-foreground mt-2 font-serif">{lastScanned.name}</h2>
+        <div className="rounded-xl shadow-lg border border-green-500/30 bg-green-500/10 p-6 text-center animate-in slide-in-from-top-4 duration-300">
+          <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-2" />
+          <h3 className="text-sm text-green-700/80 font-medium uppercase tracking-wider">Recorded successfully</h3>
+          <h2 className="text-3xl font-bold text-green-800 mt-1 font-serif">{lastScanned.name}</h2>
           
-          <div className="mt-8 space-y-3 w-full">
+          <div className="mt-6 w-full">
             <Button 
-              variant="outline" 
+              variant="destructive" 
               size="lg" 
-              className="w-full bg-background/10 text-primary-foreground border-primary-foreground/30 hover:bg-background/20 hover:text-primary-foreground" 
+              className="w-full shadow-sm" 
               onClick={handleUndo}
               disabled={isUndoing}
             >
               <RotateCcw className="mr-2 w-5 h-5" />
               {isUndoing ? "Undoing..." : "Undo Scan (Wrong Student?)"}
             </Button>
-            <p className="text-primary-foreground/60 text-sm">Resuming automatically...</p>
           </div>
         </div>
       )}
-      
-      <div id="qr-reader" className="w-full" />
     </div>
   );
 }
