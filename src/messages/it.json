@@ -7,12 +7,11 @@
   "Register": {
     "title": "Registrazione Studente",
     "fullName": "Nome Completo",
-    "email": "Email",
     "phoneNumber": "Numero di Telefono",
     "birthday": "Data di Nascita",
-    "graduation": "Anno di Diploma",
+    "academicQualification": "Titolo di Studio",
     "submit": "Registrati",
-    "success": "Registrazione completata!",
+    "success": "Registrazione completata con successo! Salva questo QR code.",
     "downloadQR": "Scarica il QR Code",
     "saveInstructions": "Salva questo codice e usalo per registrare le presenze."
   },

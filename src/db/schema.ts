@@ -48,10 +48,9 @@ export const verificationTokens = sqliteTable('verificationToken', {
 export const students = sqliteTable('students', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   fullName: text('full_name').notNull(),
-  email: text('email').notNull().unique(),
-  phoneNumber: text('phone_number'),
-  birthday: text('birthday'),
-  graduation: text('graduation'),
+  phoneNumber: text('phone_number').notNull().unique(),
+  birthday: text('birthday').notNull(),
+  academicQualification: text('academic_qualification').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp_ms' }).default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 

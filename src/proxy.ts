@@ -9,10 +9,7 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   
   if (pathname.includes('/admin') && !pathname.includes('/admin/login')) {
-    // @ts-ignore
-    const isAdmin = !!req.auth?.user?.isAdmin;
-    
-    if (!isLoggedIn || !isAdmin) {
+    if (!isLoggedIn) {
       const loginUrl = new URL(`/admin/login`, req.nextUrl.origin);
       return Response.redirect(loginUrl);
     }
