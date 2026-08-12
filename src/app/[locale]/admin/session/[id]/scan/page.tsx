@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/routing';
 import { ArrowLeft } from 'lucide-react';
 
-export default async function ScanSessionPage({ params }: { params: { id: string } }) {
+export default async function ScanSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const t = await getTranslations('Admin');
   const { id } = await params;
 
